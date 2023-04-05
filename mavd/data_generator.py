@@ -11,7 +11,7 @@ import numpy as np
 import keras
 import random
 import math
-from scipy.signal import hanning
+from scipy.signal.windows import hann as hanning
 
 from sklearn.preprocessing import StandardScaler
     
