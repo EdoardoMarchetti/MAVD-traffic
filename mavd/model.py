@@ -2,7 +2,7 @@ from keras.layers import Input, Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten,Lambda,Activation
 from keras.layers.core import Dropout
 from keras.models import Model
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from keras import backend as K
 
 def build_custom_cnn(n_freq_cnn=128, n_frames_cnn=50, n_filters_cnn=64,

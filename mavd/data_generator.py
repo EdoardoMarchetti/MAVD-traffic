@@ -14,6 +14,8 @@ import math
 from scipy.signal.windows import hann as hanning
 
 from sklearn.preprocessing import StandardScaler
+
+from tqdm import tqdm
     
 class DataGenerator(keras.utils.Sequence):
     'Generates data for the experiments'
@@ -87,7 +89,7 @@ class DataGenerator(keras.utils.Sequence):
         self.mel_bands = mel_bands
         self.audio_hop = audio_hop
         self.audio_win = audio_win
-        self.mel_basis = librosa.filters.mel(sr,n_fft,mel_bands,htk=True)
+        self.mel_basis = librosa.filters.mel(sr=sr,n_fft=n_fft,n_mels=mel_bands,htk=True)
         self.mel_basis = self.mel_basis**2 #For end-to-end networks
         self.sequence_frames = int(sequence_time * sr / float(audio_hop))
         self.sequence_hop = int(sequence_hop_time * sr / float(audio_hop))
@@ -144,7 +146,7 @@ class DataGenerator(keras.utils.Sequence):
         
         window = hanning(self.audio_win)
 
-        for i, ID in enumerate(list_IDs_temp):
+        for i, ID in enumerate(tqdm(list_IDs_temp)):
             label_file = self.labels[ID]
             
             if self.get_annotations:            
@@ -158,8 +160,7 @@ class DataGenerator(keras.utils.Sequence):
                 audio = audio[:,0]
                 
             if self.sr != sr_old:
-                print('changing sampling rate')
-                audio = librosa.resample(audio, sr_old, self.sr)
+                audio = librosa.resample(y=audio, orig_sr =sr_old, target_sr=self.sr)
 
             if self.dataset == 'MAVD':
                 event_rolls = []
@@ -266,22 +267,23 @@ class DataGenerator(keras.utils.Sequence):
                 # Get id
                 id = [ID, i]
                 id_t.append(id)
-
-        X = np.asarray(X)
         
+        X = np.asarray(X)
+        print('Data generator: preparing yt')
         if self.dataset == 'MAVD':
             for index_list,l_list in enumerate(self.label_list):
                 yt[index_list] = np.asarray(yt[index_list])
          
         if self.dataset == 'URBAN-SED':
             yt = np.asarray(yt)
-         
+        print('Data generator: preparing mel')
         mel = np.asarray(mel)
+        print('Data generator: preparing S')
         S = np.asarray(S)
         S = np.transpose(S,(0,2,1))
-
+        print('Data generator: expanding X')
         X = np.expand_dims(X, -1)
-
+        print(f'Data generator: Nromalizing')
         # Normalize
         if self.train:
             self.norm_scaler = StandardScaler()
